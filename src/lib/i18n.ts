@@ -9,7 +9,7 @@ import 'dayjs/locale/en'
 import 'dayjs/locale/es'
 import 'dayjs/locale/it'
 
-const defaultLanguage = 'en'
+const defaultLanguage = 'pt'
 
 dayjs.locale(defaultLanguage)
 dayjs.extend(localizedFormat)

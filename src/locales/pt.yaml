@@ -1,0 +1,310 @@
+commands:
+  start: Start (greetings message)
+  settings: Settings
+  help: Help
+
+labels:
+  ACCOUNTS: 💳 Contas
+  ADD_CATEGORIES: ➕ Adicionar Categorias
+  CANCEL: ✖ Cancelar
+  CATEGORIES: 🔖 Categorias
+  CHANGE_CATEGORY: 🔖 Categoria
+  CHANGE_DATE: 📆 Data
+  CHANGE_AMOUNT: 💸 Quantia
+  CHANGE_DESCRIPTION: 📝 Descrição
+  CHANGE_SOURCE_ACCOUNT: 📤 Conta de Origem
+  CHANGE_DEST_ACCOUNT: 📥 Conta de Destino
+  CLASSIFICATION: 🏷️  Classificação
+  CLOSE: 🔙 Voltar
+  DECLINE_CATEGORIES_LIST: ✏️ Não foi, tenta de novo
+  DEFAULT_ASSET_ACCOUNT_BUTTON: 💳 Conta de Ativo Padrão
+  DELETE: ❌ Apagar
+  OPEN_IN_BROWSER: 🔗 Abrir no Navegador
+  OPEN_ASSET_ACCOUNTS_IN_BROWSER: 🔗 Ir até as Contas de Ativo
+  DONE: ✅ OK
+  EDIT_TRANSACTION: ✏️ Editar
+  FIREFLY_ACCESS_TOKEN_BUTTON: 🔑 Access Token
+  FIREFLY_URL_BUTTON: 🔗 Firefly URL
+  FIREFLY_API_URL_BUTTON: 🔗 Firefly API URL
+  LIST_TAGS: 🏷️  Tag
+  RENAME_CATEGORY: ✏️ Renomear
+  REPORTS: 📈 Relatórios
+  SETTINGS: 🔧 Configurações
+  TEST_CONNECTION: 🔌 Checar Conexão
+  TO_WITHDRAWALS: 📤 Para Retiradas
+  TO_DEPOSITS: 📥 Novo Depósito
+  TO_TRANSFERS: ↔️ Nova Transferência
+  SHOW_DEPOSITS: 📥 Depósitos
+  SHOW_TRANSFERS: ↔️ Transferências
+  SHOW_WITHDRAWALS: 📤 Retiradas
+  TRANSACTIONS: 🔀 Transações
+  YES: ✅ Sim
+  SWITCH_LANG: 🌐 Idioma
+  SWITCH_TO_EN: 🇬🇧 English
+  SWITCH_TO_PT: 🇧🇷 Português
+  SWITCH_TO_ES: 🇪🇸 Spanish
+  SWITCH_TO_RU: 🇷🇺 Russian
+  SWITCH_TO_IT: 🇮🇹 Italian
+
+welcome: >
+  👋 Olá! Esse bot te ajuda a cadastrar transações rapidamente no Firefly III.
+  Ele também pode gerenciar algumas das entidades do Firefly.
+needToSet: 'Para começar a usar esse bot, você precisa informar algumas configurações:'
+setFireflyUrl: '  - *🔗 Firefly URL* - A URL da sua instância do Firefly'
+setFireflyAccessToken: '  - *🔑 Access Token* criado no site do Firefly'
+navigateToSettings: Para prosseguir vá até as *🔧 Configurações*.
+
+help: >
+  🤖 Please navigate to bot *🔧 Settings* section and set up some stuff for using the bot.   
+      
+  ❕ To add a transaction, send an amount. It can be a number, or a math expression,
+  like `100-5*3`.
+  Upon receiving amount, bot will ask additional questions for transaction parameters.
+    
+  You can also add transactions that do not require additional questions from the bot,
+  by sending transaction description and an amount, like so
+    
+  `Cafe 35`
+    
+  In this case a new withdrawal transaction from the default asset account and 
+  description `Cafe` with amount of `35` will be created.
+    
+  ✨ Going further you can set up different *Rules* in a corresponding section of
+  Firefly III, in which case all your bot transactions will be created respecting those
+  rules.
+
+common:
+  errorOccurred: An error occurred!
+  noDefaultSourceAccountExist: |
+    🙈 Whoa! You do not have any Contas de Ativo to withdraw money from!   
+       
+    🙏 Please, navigate to your Firefly III website and create at least one Asset account.
+mdlwr:
+  noFireflyURLFound: To work with the bot, you need to specify *🔗 Firefly URL* in bot *🔧 Settings*.
+  noFireflyAccessTokenFound: To work with the bot, you need to specify a valid *🔑 Access Token* in bot *🔧 Settings*.
+settings:
+  selectBotLang: 'Selecione o idioma do Bot:'
+  notSpecified: '🚨 <NOT SPECIFIED>'
+  inputFireflyUrl: >
+    Type in URL address of your Firefly III instance.
+    It should be in the format of this: *https://firefly.example.com*
+    or this: *http://localhost:8080*
+  inputFireflyApiUrl: >
+    Type in URL address of your Firefly III API endpoint.
+    Usually this is the same as you base Firefly III URL but with an */api* subpath like this:
+    *https://firefly.example.com/api* or this: *http://localhost:8080/api*
+  inputFireflyAccessToken: >
+    Paste your Personal Access Token.
+    You can create and copy it from the Firefly III web interface:
+    *Options → Profile → OAuth → Create new token*
+  defaultAssetAccountSet: Default asset account has been set!
+  whatDoYouWantToChange: >
+    🔧 *Settings*  
+       
+    What do you want to change?  
+       
+    *🔗 Firefly URL*: ${fireflyUrl || '🚨 <NOT SPECIFIED>'}
+
+    *🔗 Firefly API URL*: ${fireflyApiUrl || '🚨 <NOT SPECIFIED>'}
+
+    *🔑 Access Token*: ${accessToken || '🚨 <NOT SPECIFIED>'}
+
+    *💳 Default asset account*: ${defaultSourceAccount.name || '🚨 <NOT SPECIFIED>'}
+  selectDefaultAssetAccount: >
+    Choose an asset account which will be used as a default one for withdrawals.
+    If left unset, the very first asset account from the list below will be used by default:
+  specifySmthFirst: Specify ${smth} first.
+  connectionFailed: Connection has NOT been established!
+  connectionFailedUnauthenticated: Authentication error! Please make sure that specified Access Token is not malformed and not expired.
+  resourceNotFound: >
+    Resource not found!
+    Please make sure that you specified the right Firefly API URL.
+    This also may happen if you are trying to get or edit a non existing resource.
+  connectionFailedBadUrl: >
+    Error connecting to Firefly host!
+    Please make sure that you specified the right *🔗 Firefly API URL*.
+  connectionSuccess: >
+    🎉 Connection established!  
+       
+    👋 Hi, ${email}!
+  badAccessToken: Entered text does not look like an Access Token. Try again, please.
+  badUrl: >
+    Entered text does not look like a URL address. Try again, please.
+    Type in the URL address of your Firefly III instance, for example https://firefly.example.com:
+
+accounts:
+  labels:
+    asset: Contas de Ativo
+    expense: Contas de Despesa
+    revenue: Revenue accounts
+    liability: Liabilities
+  list:
+    noAccounts: No accounts yet🤷
+    asset: >
+      Balance of your Contas de Ativo:
+       
+      <pre>${accounts.replace(/\n$/, '')}
+      
+      ──────────────────
+      
+      SUM: ${sums ? sums : '0'}</pre>
+    expense: >
+      Balance of your Contas de Despesa:
+       
+      <pre>${accounts.replace(/\n$/, '')}
+      
+      ──────────────────
+      
+      SUM: ${sums ? sums : '0'}</pre>
+    revenue: >
+      Balance of your revenue accounts:
+       
+      <pre>${accounts.replace(/\n$/, '')}
+      
+      ──────────────────
+      
+      SUM: ${sums ? sums : '0'}</pre>
+    liability: >
+      Balance of your liabilities:
+       
+      <pre>${accounts.replace(/\n$/, '')}
+      
+      ──────────────────
+      
+      SUM: ${sums ? sums : '0'}</pre>
+
+transactions:
+  list:
+    withdrawal: >
+      Your withdrawals for <b>${day}</b>:  
+        
+      <pre>${transactions.replace(/\n$/, '')}
+      
+      ──────────────────
+      
+      SUM: ${sums ? sums : '0'}</pre>
+    deposit: >
+      Your deposits for <b>${day}</b>:  
+        
+      <pre>${transactions.replace(/\n$/, '')}
+      
+      ──────────────────
+      
+      SUM: ${sums ? sums : '0'}</pre>
+    transfer: >
+      Your transactions for <b>${day}</b>:  
+        
+      <pre>${transactions.replace(/\n$/, '')}</pre>
+    noTransactions: 🤷 No transactions
+  add:
+    dontUnderstand: >
+      🤖 I don't understand that.  
+        
+      Enter a transaction amount, it needs to be a number!  
+
+      Or you may type in a transaction description and an amount, i.e. `Groceries 25`.
+    withdrawalMessage: >
+      📆 ${date}  
+        
+      📤 Adicionei ${description === 'N/A' ? '' : '*' + description + '*'}
+      *${amount}* *${currency}*${category ? ' para a categoria *' + category + '*' : ''}  
+
+      ${source} → ${destination}
+    depositMessage: >
+      📆 ${date}  
+       
+      📥 Added ${description === 'N/A' ? '' : '*' + description + '* '}
+      *${amount}* *${currency}*${category ? ' para a categoria *' + category + '*' : ''}
+      
+      de ${source} → ${destination}
+    transferMessage: >
+      📆 ${date}  
+         
+      ↔️ Transferência *${amount}* *${currency}* da conta *${source}* para a conta *${destination}*${foreignAmount ? " (" + foreignAmount + " " + foreignCurrencySymbol + ")" : ''}${category ? ' para a categoria *' + category + '*' : ''}
+    selectCategory: Deseja adicionar *${amount}* para qual categoria?
+    noCategoriesYet: |
+      🤷 You haven't created any categories yet.
+      The transaction will be created without a category. Continue?
+            
+      💡 You can ceasily create new categories from a corresponding *🔖 Categories* bot button.
+    transactionDeleted: Transaction deleted!
+    couldNotDelete: 'Could not delete transaction by id: ${id}'
+    selectRevenueAccount: 'Choose a revenue account to withdraw *${amount}* from:'
+    selectAssetAccount: 'Choose an asset account to add *${amount}* to:'
+    selectSourceAccount: 'Choose an account to transfer *${amount}* from:'
+    selectDestAccount: 'Choose an account to transfer to:'
+    transactionError: '❗😰 Ann error occurred during transaction creation: *${message}*'
+    created: Transaction created!
+    typeForeignAmount: >
+      ⚠️ The destination account currency (*${destCurrency}*) is different than the source account currency (*${sourceCurrency}*)!
+      Type in the foreign amount i.e. the amount in the destination account currency.  
+        
+      💡 You can use the arithmetic signs for addition, subtraction, multiplication and division to
+      perform the appropriate operation on the source account amount of the transaction.  
+        
+      For example, `*15` would multiply the initial amount by 15 to get the foreign amount.
+
+  edit:
+    whatToEdit: ❓What do you want to change?
+    updated: Transaction updated!
+    badAmountTyped: 'An amount should be a number. Type in new amount please:'
+    badDescriptionTyped: 'Description needs to be text. Type in new description please:'
+    typeNewAmount: >
+      Type in new amount.
+
+      💡 You can use the arithmetic signs for addition, subtraction, multiplication and division to perform the appropriate operation on the current value of the transaction.
+
+      For example, "+35" would add 35 to existing amount of transaction.
+    noCategoriesYet: |
+      🤷 You haven't created any categories yet.
+            
+      💡 You can easily create new categories from a corresponding *🔖 Categories* bot button.
+    typeNewDescription: 'Type in new description:'
+    chooseNewCategory: 'Choose new category:'
+    chooseNewSourceAccount: 'Choose new source account:'
+    chooseNewDestinationAccount: 'Choose new destination account:'
+    chooseNewRevenueAccount: 'Choose new revenue account:'
+    noSuchTransactionAnymore: |
+      🤖 This transaction (${id}) does not exist anymore!
+      It was probably deleted via the Firefly website.
+
+categories:
+  listEmpty: No categories yet :(
+  list: >
+    To view transactions for a specific category, choose it from the list bellow.
+    You can also rename or delete a category once it is chosen.
+  typeCategories: >
+    Type in your new categories so that each one would be on a separate line, for example: 
+       
+    💡 Utilities
+
+    👕 Clothes and shoes
+
+    🥦 Groceries  
+       
+    *P.S.*: Category names can be changed later.
+
+    *P.P.S.*: It's OK if a category with the same name already exists.
+  confirmCreation: >
+    ${categories.length} new category(s) will be created:   
+       
+    ${categories.join('\n')}  
+       
+    Is that OK?
+  typeNewName: 'Type in new category name:'
+  confirmDeletion: >
+    Are you sure that you want to delete this category?
+    Corresponding transactions won't be deleted. They can be found in *🔀 Transactions* section.
+  deleted: Category deleted!
+  noTransactions: No transactions
+  transactionsList: >
+    <b>${categoryName}</b> withdrawals for the month of <b>${monthName}</b>:  
+      
+    <pre>${transactions.replace(/\n$/, '')}
+    
+    ──────────────────
+    
+    SUM: ${sums ? sums : '0'}</pre>
+
+reports:
+  notImplemented: Sorry, but reports are not implemented yet 😞
