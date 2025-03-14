@@ -1,4 +1,5 @@
-﻿FROM node:20-bullseye
+﻿ENV botToken=0
+FROM node:20-bullseye
 
 WORKDIR /home/node/app
 
@@ -8,6 +9,6 @@ RUN npm install --omit=dev --omit=optional \
     && npm install --omit=optional
 
 COPY --dir src ./
-RUN export BOT_TOKEN=<your-bot-token>
+RUN export BOT_TOKEN=$botToken
 
 CMD npm start
