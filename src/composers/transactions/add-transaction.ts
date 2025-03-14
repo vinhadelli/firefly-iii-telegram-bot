@@ -43,7 +43,8 @@ export async function addTransaction(ctx: MyContext) {
   const log = rootLog.extend('addTransaction')
   log('Entered text handler')
   try {
-    const text = ctx.message!.text as string
+    let tempText = ctx.message!.text as string
+    const text = tempText.replace(',','.')
     const { userSettings } = ctx.session
     log('ctx.message.text: %O', text)
 
