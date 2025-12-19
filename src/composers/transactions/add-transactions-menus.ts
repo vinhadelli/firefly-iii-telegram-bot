@@ -8,6 +8,7 @@ import type { MyContext } from '../../types/MyContext'
 import { AccountTypeFilter } from '../../lib/firefly/model/account-type-filter'
 import { AccountRead } from '../../lib/firefly/model/account-read'
 import { TransactionTypeProperty } from '../../lib/firefly/model/transaction-type-property'
+import { createMenuDatePicker, MenuDatePicker } from '../../lib/menu-date-picker'
 import { Route as AddRoute } from './add-transaction'
 import { Route as EditRoute } from './edit-transaction'
 import { MENUS, CATEGORIES_PAGE_LIMIT } from '../constants'
@@ -33,6 +34,7 @@ type TransactionUpdate = {
   description?: string
   amount?: string
   currencyId?: string
+  date?: string
 }
 
 
@@ -62,6 +64,7 @@ transactionRecordMenu.register([
   createEditCategoryMenu(),
   createEditAmountMenu(),
   createEditDescriptionMenu(),
+  createEditDateMenu(),
   createEditSourceAccountMenu(),
   createEditDestinationAccountMenu(),
   // createDeleteTransactionmenu(),
@@ -165,7 +168,7 @@ function createNewDepositMenu() {
 
             cleanupSessionData(ctx)
 
-            ctx.session.currentTransaction = tr
+            ctx.session.newTransaction.id = tr.id
 
             return ctx.editMessageText(
               formatTransaction(ctx, tr),
@@ -445,23 +448,27 @@ function createTransactionRecordMenu() {
   return new MenuRange<MyContext>().dynamic((ctx, range) => {
     const log = rootLog.extend('createTransactionMenu')
 
-    const currentTransaction = ctx.session.currentTransaction
+    const currentTransaction: any = ctx.session.newTransaction.id
+      ? ctx.session.newTransaction
+      : ctx.session.currentTransaction
 
     log('currentTransaction: %O', currentTransaction)
 
-    // If transaction does not have a category, show button to specify one
-    if (currentTransaction && !currentTransaction.attributes!.transactions[0].category_id) {
-      log('No category for the transaction. Adding category button to menu...')
-      range.submenu(
-        {
-          text: ctx.i18n.t('labels.CHANGE_CATEGORY'),
-          payload: currentTransaction!.id
-        },
-        MENUS.EDIT_TRANSACTION__EDIT_CATEGORY,
-        augmentSessionWithCurrentTransaction,
-        augmentSessionWithCategories,
-      )
-    }
+    // FIXME: If transaction does not have a category, show button to specify one
+    // This is currently not working as expected
+    //
+    // if (currentTransaction && (!currentTransaction.categoryId || !currentTransaction.attributes!.transactions[0].category_id )) {
+    //   log('No category for the transaction. Adding category button to menu...')
+    //   range.submenu(
+    //     {
+    //       text: ctx.i18n.t('labels.CHANGE_CATEGORY'),
+    //       payload: currentTransaction!.id
+    //     },
+    //     MENUS.EDIT_TRANSACTION__EDIT_CATEGORY,
+    //     augmentSessionWithCurrentTransaction,
+    //     augmentSessionWithCategories,
+    //   )
+    // }
 
     log('Adding edit transaction button to menu...')
     range.submenu(
@@ -473,6 +480,7 @@ function createTransactionRecordMenu() {
       augmentSessionWithCurrentTransaction
     )
 
+    ctx.session.newTransaction = {}
     return range
   })
 }
@@ -484,6 +492,7 @@ function createEditTransactionMenu(ctx: MyContext) {
 
   return new MenuRange<MyContext>()
     .append(createEditCategorySubmenu(transactionId))
+    .append(createEditDateSubmenu(transactionId)).row()
     .row()
     .append(createEditSourceAccountSubmenu(transactionId))
     .append(createEditDestinationAccountSubmenu(transactionId))
@@ -501,9 +510,6 @@ function createEditTransactionMenu(ctx: MyContext) {
     .url(ctx.i18n.t('labels.OPEN_IN_BROWSER'), `${fireflyUrl}/transactions/show/${transactionId}`).row()
     .text({ text: ctx => ctx.i18n.t('labels.DELETE'), payload: transactionId }, deleteTransactionMiddleware)
     .text({ text: '🔙', payload: transactionId }, closeEditTransactionMenu).row()
-  // TODO: Add functionality to change the date of a transaction
-  // Try this repo: https://github.com/daniharo/grammy-calendar
-  // .text(ctx.i18n.t('labels.CHANGE_DATE'), ctx => ctx.reply('Not implemented'))
 }
 
 function createEditCategoryMenu() {
@@ -519,6 +525,47 @@ function createEditAmountMenu() {
 
 function createEditDescriptionMenu() {
   return new Menu<MyContext>(MENUS.EDIT_TRANSACTION__EDIT_DESCRIPTION)
+    .text({ text: '🔙' }, closeEditTransactionMenu).row()
+}
+
+function createEditDateMenu() {
+  return new Menu<MyContext>(MENUS.EDIT_TRANSACTION__EDIT_DATE)
+    .dynamic(async (ctx, range) => {
+      // Get or create date picker state
+      const state = ctx.session.datePickerState || MenuDatePicker.createDefaultState();
+      
+      // Create date picker
+      const picker = createMenuDatePicker({
+        language: ctx.i18n.languageCode
+      });
+      
+      // Return the date picker range
+      return picker.createDatePicker(
+        state,
+        async (selectedDate) => {
+          // Handle date selection for transaction editing
+          if (ctx.session.currentTransaction) {
+            // Update the transaction date
+            const updatedTr = await updateFireflyTransaction(ctx, {
+              date: selectedDate
+            });
+            ctx.session.currentTransaction = updatedTr;
+            
+            // Clear picker state and return to transaction menu
+            delete ctx.session.datePickerState;
+            
+            await ctx.editMessageText(
+              formatTransaction(ctx, updatedTr),
+              {
+                parse_mode: 'Markdown',
+                reply_markup: transactionRecordMenu
+              }
+            );
+          }
+        },
+        ctx
+      );
+    })
     .text({ text: '🔙' }, closeEditTransactionMenu).row()
 }
 
@@ -809,6 +856,7 @@ async function updateFireflyTransaction(ctx: MyContext, update: TransactionUpdat
         destination_id: update.destinationAccountId || tr.attributes?.transactions[0].destination_id,
         category_id: update.categoryId || tr?.attributes?.transactions[0].category_id,
         currency_id: update.currencyId || tr?.attributes?.transactions[0].currency_id,
+        date: update.date || tr?.attributes?.transactions[0].date,
       }]
     }
     log('Update payload: %O', payload)
@@ -862,6 +910,37 @@ async function changeTransactionDescriptionMiddleware(ctx: MyContext) {
     return ctx.editMessageText(ctx.i18n.t('transactions.edit.typeNewDescription'))
   } catch (err) {
     console.error(err)
+  }
+}
+
+function createEditDateSubmenu(transactionId: string) {
+  return new MenuRange<MyContext>().submenu(
+    {
+      text: ctx => ctx.i18n.t('labels.CHANGE_DATE'),
+      payload: transactionId
+    },
+    MENUS.EDIT_TRANSACTION__EDIT_DATE,
+    changeTransactionDateMiddleware
+  )
+}
+
+async function changeTransactionDateMiddleware(ctx: MyContext) {
+  const log = rootLog.extend('changeTransactionDate')
+  log('Entered changeTransactionDate action handler')
+  try {
+    const trId = ctx.match
+    log('Transaction ID: %s', trId)
+
+    const messageId = ctx.update?.callback_query?.message!.message_id || 0
+    const chatId = ctx.update?.callback_query?.message!.chat.id || 0
+    log('deleteMessage: messageId: %s', messageId)
+    log('deleteMessage: chatId: %s', chatId)
+    ctx.session.deleteBotsMessage = { chatId, messageId }
+
+    return ctx.editMessageText(ctx.i18n.t('transactions.edit.typeNewDate'))
+  } catch (err) {
+    console.error(err)
+    return ctx.reply('Error setting up date change: ' + (err as Error).message)
   }
 }
 

@@ -49,6 +49,7 @@ docker run \
   cyxou/firefly-iii-telegram-bot:latest
 ```
 
+
 Once the bot is running, navigate to its **Settings** and provide all the
 necessary information to connect it to your Firefly III instance.
 
@@ -60,11 +61,38 @@ For this you need to have NodeJS installed.
  - Clone the repository
  - Install dependencies by running `npm install`
  - Run `export BOT_TOKEN=<your-bot-token>`
+ - (Optional) Restrict access: `export ALLOWED_TG_USER_IDS=123456,987654321`
+   - If not set, the bot will respond to all users.
  - Run `npm start`
 
 If you'll have certificate errors when trying to connect to Firefly III instance,
 stop the bot, do `export NODE_TLS_REJECT_UNAUTHORIZED=0` in your shell and start the
 bot.
+
+## Access Control & Security
+
+### Restricting Access to Specific Users
+
+You can restrict who can use your bot by setting the `ALLOWED_TG_USER_IDS` environment variable to a comma-separated list of allowed Telegram user IDs. Only users whose IDs are in this list will be able to interact with the bot. If `ALLOWED_TG_USER_IDS` is not set, the bot will respond to all users.
+
+Example with restricted access:
+```shell
+docker run \
+  --rm --it --init --name firefly-bot \
+  --volume `pwd`/sessions:/home/node/app/sessions \
+  --env BOT_TOKEN=<your-bot-token> \
+  --env ALLOWED_TG_USER_IDS=123456,987654321 \
+  cyxou/firefly-iii-telegram-bot:latest
+```
+
+### Logging Unauthorized Access Attempts
+
+By default, if an unauthorized user tries to use the bot, a log message will be printed to the console with their Telegram ID and a hint to add it to the allowed list. This helps admins quickly identify and authorize new users.
+
+To disable this logging, set:
+```
+DISABLE_UNAUTHORIZED_USER_LOG=true
+```
 
 ## Development
 
@@ -85,7 +113,7 @@ More info [here](https://docs.earthly.dev/docs/guides/multi-platform).
 ## TODO
 - [x] Add English translations and make it a default language
 - [x] Add transactions improvements (create transfers and deposits)
-- [x] Edit transactions (no date change thus far)
+- [x] Edit transactions
 - [x] Localization based on Firefly user's preferences
 - [x] Accounts management
 - [x] List transactions
@@ -95,8 +123,8 @@ More info [here](https://docs.earthly.dev/docs/guides/multi-platform).
 - [ ] Reports
 - [ ] Proper error handling
 - [ ] Firefly API tests
-- [x] Add JSON database for persistance (used @grammyjs/storage-file)
-- [ ] Add date picker when editing transaction (adopt https://github.com/gianlucaparadise/telegraf-calendar-telegram)
+- [x] Add JSON database for persistence (used @grammyjs/storage-file)
+- [x] Add date picker when editing transaction (adopt https://github.com/VDS13/telegram-inline-calendar)
 - [x] Migrate from home grown Mapper to Grammy's Menu plugin (partially done)
 - [ ] Add tags support
 
@@ -137,3 +165,10 @@ which is hard-coded in `codegen` npm task.
 Please join our Telegram group - any feedback is very appreciated!  
 
 [![Telegram Group](https://img.shields.io/badge/Support%20Group-white?logo=telegram)](https://t.me/firefly_iii_telegram_bot_group)
+
+## Contributors
+<a href="https://github.com/cyxou/firefly-iii-telegram-bot/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=cyxou/firefly-iii-telegram-bot" />
+</a>
+
+[contrib.rocks](https://contrib.rocks).

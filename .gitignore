@@ -13,3 +13,8 @@
 /sessions/
 .arg
 .vscode/settings.json
+.aider
+.aider.chat.history.md
+.aider.conf.yml
+.aider.input.history
+.aider.model.settings.yml
